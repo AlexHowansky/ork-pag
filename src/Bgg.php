@@ -1,20 +1,19 @@
 <?php
 
 /**
- * Ork BGG
+ * Ork PAG
  *
- * @package   Ork\BGG
- * @copyright 2019-2024 Alex Howansky (https://github.com/AlexHowansky)
- * @license   https://github.com/AlexHowansky/ork-bgg/blob/master/LICENSE MIT License
- * @link      https://github.com/AlexHowansky/ork-bgg
+ * @package   Ork\PAG
+ * @copyright Alex Howansky (https://github.com/AlexHowansky)
+ * @license   https://github.com/AlexHowansky/ork-pag/blob/master/LICENSE MIT License
+ * @link      https://github.com/AlexHowansky/ork-pag
  */
 
-namespace Ork\Bgg;
+namespace Ork\Pag;
 
 use Generator;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
-use Psr\Http\Message\ResponseInterface;
 use RuntimeException;
 use SimpleXMLElement;
 

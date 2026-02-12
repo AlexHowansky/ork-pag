@@ -4,7 +4,7 @@
 require_once realpath(__DIR__ . '/../vendor/autoload.php');
 
 use Garden\Cli\Cli;
-use Ork\Bgg\Pdf;
+use Ork\Pag\Pdf;
 
 $cli = (new Cli())
     ->description('Generate game box labels.')

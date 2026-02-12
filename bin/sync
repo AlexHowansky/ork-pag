@@ -4,7 +4,7 @@
 require_once realpath(__DIR__ . '/../vendor/autoload.php');
 
 use Garden\Cli\Cli;
-use Ork\Bgg\Collection;
+use Ork\Pag\Collection;
 
 $cli = (new Cli())
     ->description('Synchronize the local database with BGG for games owned by one user.')

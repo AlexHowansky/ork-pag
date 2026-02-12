@@ -1,9 +1,9 @@
 {
-    "name": "ork/bgg",
+    "name": "ork/pag",
     "type": "project",
     "description": "A simple web app to catalog, browse, and search your board game collection.",
     "keywords": ["ork", "boardgame"],
-    "homepage": "http://github.com/AlexHowansky/ork-bgg",
+    "homepage": "http://github.com/AlexHowansky/ork-pag",
     "license": "MIT",
     "authors": [
         {
@@ -28,8 +28,8 @@
     "require-dev": {
         "matthiasmullie/minify": "^1.3.75",
         "ork/phpcs": "^3",
-        "phpstan/phpstan": "^2.1.33",
-        "rector/rector": "^2.2.14",
+        "phpstan/phpstan": "^2.1.39",
+        "rector/rector": "^2.3.6",
         "roave/security-advisories": "dev-latest"
     },
     "suggest": {
@@ -37,7 +37,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Ork\\Bgg\\": "src/"
+            "Ork\\Pag\\": "src/"
         }
     },
     "scripts": {
@@ -46,8 +46,8 @@
             "php -S 127.0.0.1:8888 -t public"
         ],
         "minify": [
-            "minifyjs js/bgg.js > public/bgg.min.js",
-            "minifycss css/bgg.css > public/bgg.min.css"
+            "minifyjs js/pag.js > public/pag.min.js",
+            "minifycss css/pag.css > public/pag.min.css"
         ],
         "phpcs": "phpcs",
         "phpstan": "phpstan analyze",

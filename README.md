@@ -1,25 +1,29 @@
-# Ork BGG
+# Pick-a-Game
 
-Ork BGG is a simple web app to catalog, browse, and search your board game
-collection. It pulls data from [Board Game Geek](http://boardgamegeek.com) and
-caches it in a local SQLite database for quick searches.
+**Pick-a-Game** a.k.a. **PAG** attempts to help answer the age-old question,
+"What should we play?" It is a simple web app to catalog, browse, and search
+your board game collection. It pulls data from the
+[Board Game Geek](http://boardgamegeek.com) API and caches it to a local SQLite
+database for quick searches.
 
 ## Installation
 
+You'll need a PHP runtime and a web server.
+
 ```sh
-git clone https://github.com/AlexHowansky/ork-bgg.git
+git clone https://github.com/AlexHowansky/ork-pag.git
 composer install
 ```
 
-Run a development server with `composer go` or point your webserver's document
-root to the `public` directory.
+Run a local temporary development server with `composer go` or create a vhost
+and point the webserver's document root at the `public` directory.
 
 ## Local Data Cache
 
-Run `bin/sync <bgg username>` to pull/sync your collection from BGG. The
-username is case sensitive. Any game in your "Own" collection on BGG will be
-copied into the local database for the indicated user. Optional parameters
-include:
+Run `bin/sync <BGG username>` to pull/sync your collection from BGG. The
+username is case sensitive. Any game that you have marked as "Own" on BGG
+will be copied into the local database for the indicated user. Optional
+parameters include:
 
 `--all`
 
@@ -36,12 +40,13 @@ the name on. Only matching titles will be synced.
 
 ![example label](label.png "example label")
 
-Ork BGG can create box labels to summarize important game characteristics in a
-consistent place and format. These are designed to fit on standard Avery 5160
-address label sheets, and include a QR code to the BoardGameGeek detail page
-for that game. When printing, make sure to disable any fit-to-page feature that
-your system offers. Print the document at actual size or 100% zoom. To generate
-a PDF of labels, run `bin/labels <bgg username>`. Optional parameters include:
+<strong>PAG</strong> can create box labels to summarize important game
+characteristics in a consistent place and format. These are designed to fit on
+standard Avery 5160 address label sheets, and include a QR code to the BGG
+detail page for that game. When printing, make sure to disable any fit-to-page
+feature that your system offers. Print the document at actual size or 100% zoom.
+To generate a PDF of labels, run `bin/labels <BGG username>`. Optional
+parameters include:
 
 `--pattern <pattern>`
 

@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Ork BGG
+ * Ork PAG
  *
- * @package   Ork\BGG
- * @copyright 2019-2024 Alex Howansky (https://github.com/AlexHowansky)
- * @license   https://github.com/AlexHowansky/ork-bgg/blob/master/LICENSE MIT License
- * @link      https://github.com/AlexHowansky/ork-bgg
+ * @package   Ork\PAG
+ * @copyright Alex Howansky (https://github.com/AlexHowansky)
+ * @license   https://github.com/AlexHowansky/ork-pag/blob/master/LICENSE MIT License
+ * @link      https://github.com/AlexHowansky/ork-pag
  */
 
-namespace Ork\Bgg;
+namespace Ork\Pag;
 
 use PDO;
 use PDOException;
@@ -140,7 +140,7 @@ class Db
      */
     protected function getDsn(): string
     {
-        return 'sqlite:' . $this->getDatabaseDir() . '/bgg.sq3';
+        return 'sqlite:' . $this->getDatabaseDir() . '/pag.sq3';
     }
 
     /**
@@ -223,7 +223,7 @@ class Db
      */
     protected function getSqlFile(): string
     {
-        $sqlFile = $this->getDatabaseDir() . '/bgg.sql';
+        $sqlFile = $this->getDatabaseDir() . '/pag.sql';
         if (file_exists($sqlFile) === false) {
             throw new RuntimeException('Unable to locate SQL file.');
         }

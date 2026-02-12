@@ -1,17 +1,17 @@
 <?php
 
 /**
- * Ork BGG
+ * Ork PAG
  *
- * @package   Ork\BGG
- * @copyright 2019-2024 Alex Howansky (https://github.com/AlexHowansky)
- * @license   https://github.com/AlexHowansky/ork-bgg/blob/master/LICENSE MIT License
- * @link      https://github.com/AlexHowansky/ork-bgg
+ * @package   Ork\PAG
+ * @copyright Alex Howansky (https://github.com/AlexHowansky)
+ * @license   https://github.com/AlexHowansky/ork-pag/blob/master/LICENSE MIT License
+ * @link      https://github.com/AlexHowansky/ork-pag
  */
 
-namespace Ork\Bgg;
+namespace Ork\Pag;
 
-use Ork\Bgg\Route\Index;
+use Ork\Pag\Route\Index;
 use Psr\Container\ContainerInterface;
 use Slim\Http\Environment;
 use Slim\Http\Uri;
