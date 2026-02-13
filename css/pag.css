@@ -1,3 +1,8 @@
+/* Hide the DataTables sorting icons. */
+table.dataTable span.dt-column-order {
+    display: none;
+}
+
 table tbody tr td {
     cursor: pointer;
 }

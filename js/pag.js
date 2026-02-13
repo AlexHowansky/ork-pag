@@ -9,7 +9,11 @@ $(function() {
         $('#form').submit();
     });
     $('#table').DataTable({
-        order: [[2, 'desc']],
+        columnDefs: [
+            { targets: [0], className: 'dt-left' },
+            { targets: '_all', className: 'dt-center' }
+        ],
+        order: [[2, 'desc'], [1, 'asc']],
         paging: false,
         searching: false,
     });
