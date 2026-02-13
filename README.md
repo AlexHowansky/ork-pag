@@ -8,15 +8,18 @@ database for quick searches.
 
 ## Installation
 
-You'll need a PHP runtime and a web server.
+You'll need a PHP runtime. For a production deployment, you'll also need a web
+server. Install with:
 
 ```sh
 git clone https://github.com/AlexHowansky/ork-pag.git
-composer install
+composer install --no-dev
 ```
 
-Run a local temporary development server with `composer go` or create a vhost
-and point the webserver's document root at the `public` directory.
+For a temporary local server, run `composer go`.
+
+For a more permanent installation, create a vhost on your webserver and point
+its document root at the `public` directory of this checkout.
 
 ## Local Data Cache
 
