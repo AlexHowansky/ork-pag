@@ -2,24 +2,31 @@
 
 **Pick-a-Game** a.k.a. **PAG** attempts to help answer the age-old question,
 "What should we play?" It is a simple web app to catalog, browse, and search
-your board game collection. It pulls data from the
-[Board Game Geek](http://boardgamegeek.com) API and caches it to a local SQLite
-database for quick searches.
+your board game collection. It pulls data from the [BoardGameGeek](http://boardgamegeek.com)
+API and caches it to a local SQLite database for quick searches.
 
 ## Installation
 
-You'll need a PHP runtime. For a production deployment, you'll also need a web
-server. Install with:
+You will need a PHP runtime, and, for a production deployment, a web server.
+Install the application with:
 
 ```sh
 git clone https://github.com/AlexHowansky/ork-pag.git
 composer install --no-dev
 ```
 
-For a temporary local server, run `composer go`.
+Due to changes in the BGG API requirements, you will need to apply for and
+obtain an API key from [the applications page](https://boardgamegeek.com/applications).
+Create a `.env` file containing this key.
 
-For a more permanent installation, create a vhost on your webserver and point
-its document root at the `public` directory of this checkout.
+```sh
+cp .env.dist .env
+vim .env
+```
+
+For a temporary local server, run `composer go`. For a more permanent
+installation, create a vhost on your webserver and point its document root at
+the `public` directory of this checkout.
 
 ## Local Data Cache
 

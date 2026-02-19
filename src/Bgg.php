@@ -11,6 +11,8 @@
 
 namespace Ork\Pag;
 
+use Dotenv\Dotenv;
+use Dotenv\Exception\InvalidPathException;
 use Generator;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -24,12 +26,23 @@ class Bgg
 {
 
     // The BGG API base URI.
-    protected const BASE_URI = 'https://www.boardgamegeek.com/xmlapi2/';
+    protected const BASE_URI = 'https://boardgamegeek.com/xmlapi2/';
 
     // If we get rejected due to a rate limit restriction, sleep this long and
     // then try again. The API throws a 429 status but does not provide any
     // sort of X-Retry-After header, so we just have to guess.
     protected const RATE_LIMIT_SLEEP = 30;
+
+    public function __construct()
+    {
+        try {
+            Dotenv::createImmutable(__DIR__ . '/..')->load();
+        } catch (InvalidPathException $e) {
+            throw new InvalidPathException(
+                'No .env file found. Create one via `cp .env.dist .env` and then edit to add your API key.'
+            );
+        }
+    }
 
     /**
      * Build a Game object of details from a API XML packet.
@@ -97,7 +110,13 @@ class Bgg
             $xml = false;
             try {
                 $xml = simplexml_load_string(
-                    (new Client(['base_uri' => self::BASE_URI]))
+                    (new Client([
+                        'base_uri' => self::BASE_URI,
+                        'headers' => [
+                            'User-Agent' => 'ork-pag',
+                            'Authorization' => 'Bearer ' . $_ENV['BGG_API_TOKEN'],
+                        ],
+                    ]))
                         ->get($url, ['query' => $args])
                         ->getBody()
                         ->getContents()
@@ -188,7 +207,7 @@ class Bgg
         );
         foreach ($things as $thing) {
             $recommended = [];
-            foreach ($thing->xpath('//poll[@name="suggested_numplayers"]/results') as $results) {
+            foreach ($thing->xpath('//poll[@name="suggested_numplayers"]/results') ?? [] as $results) {
                 foreach ($results as $result) {
                     if ((string) ($result->attributes()['value'] ?? '') === 'Best') {
                         $recommended[(int) ($results->attributes()['numplayers'] ?? 0)] =
