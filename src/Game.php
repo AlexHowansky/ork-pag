@@ -103,7 +103,7 @@ class Game
     protected function lazyLoad(): void
     {
         if (array_key_exists('hash', $this->data) === false) {
-            $this->data += (new Bgg())->getDetailsForThing($this->id);
+            $this->data += new Bgg()->getDetailsForThing($this->id);
             ksort($this->data);
             $this->data['hash'] = md5((string) json_encode($this->data, JSON_THROW_ON_ERROR));
             ksort($this->data);

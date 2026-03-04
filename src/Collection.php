@@ -45,7 +45,7 @@ class Collection
     {
         $db = new Db();
         $ownedGameIds = [];
-        foreach ((new Bgg())->getCollectionForUser($username, $pattern) as $apiGame) {
+        foreach (new Bgg()->getCollectionForUser($username, $pattern) as $apiGame) {
             $ownedGameIds[] = $apiGame->id;
             $dbGame = $db->getGame($apiGame->id);
             if (empty($dbGame) === true) {

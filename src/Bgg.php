@@ -37,7 +37,7 @@ class Bgg
     {
         try {
             Dotenv::createImmutable(__DIR__ . '/..')->load();
-        } catch (InvalidPathException $e) {
+        } catch (InvalidPathException) {
             throw new InvalidPathException(
                 'No .env file found. Create one via `cp .env.dist .env` and then edit to add your API key.'
             );
@@ -110,13 +110,13 @@ class Bgg
             $xml = false;
             try {
                 $xml = simplexml_load_string(
-                    (new Client([
+                    new Client([
                         'base_uri' => self::BASE_URI,
                         'headers' => [
                             'User-Agent' => 'ork-pag',
                             'Authorization' => 'Bearer ' . $_ENV['BGG_API_TOKEN'],
                         ],
-                    ]))
+                    ])
                         ->get($url, ['query' => $args])
                         ->getBody()
                         ->getContents()

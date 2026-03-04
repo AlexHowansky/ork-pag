@@ -190,7 +190,7 @@ class Pdf
 
     public function generate(array $params = []): self
     {
-        $games = (new Db())->getGames($params);
+        $games = new Db()->getGames($params);
         if (empty($games) === true) {
             throw new RuntimeException('Pattern matched no titles, nothing generated.');
         }
@@ -209,7 +209,7 @@ class Pdf
             new RendererStyle($size, 0, new DotsModule(0.95)),
             new ImagickImageBackEnd(self::QR_CODE_TYPE)
         );
-        (new Writer($renderer))->writeFile($game->url, $name);
+        new Writer($renderer)->writeFile($game->url, $name);
         return $name;
     }
 
