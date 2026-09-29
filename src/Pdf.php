@@ -92,8 +92,8 @@ class Pdf
     public function __construct()
     {
         $this->pdf = new Fpdf();
-        $this->pdf->AddFont('default', '', 'BarlowCondensed-Regular.php', $this->fontDir());
-        $this->pdf->AddFont('default', 'B', 'BarlowCondensed-Bold.php', $this->fontDir());
+        $this->pdf->AddFont('default', '', 'BarlowCondensed-Regular.json', $this->fontDir());
+        $this->pdf->AddFont('default', 'B', 'BarlowCondensed-Bold.json', $this->fontDir());
         $this->pdf->SetDisplayMode('real', 'single');
         $this->pdf->SetAutoPageBreak(false);
         $this->pdf->SetMargins(0, 0, 0);

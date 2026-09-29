@@ -11,9 +11,9 @@
 
 namespace Ork\Pag\Route;
 
-use Psr\Container\ContainerInterface as Container;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
+use Slim\Views\Twig;
 
 /**
  * Abstract route.
@@ -41,15 +41,6 @@ abstract class AbstractRoute implements RouteInterface
      * @var Response
      */
     protected $response;
-
-    /**
-     * Constructor.
-     *
-     * @param Container $container The request container.
-     */
-    public function __construct(protected Container $container)
-    {
-    }
 
     /**
      * Invoke a route.
@@ -82,7 +73,7 @@ abstract class AbstractRoute implements RouteInterface
      */
     public function render(string $template, array $args = []): Response
     {
-        return $this->container->get('view')->render($this->response, $template, $args);
+        return Twig::fromRequest($this->request)->render($this->response, $template, $args);
     }
 
 }

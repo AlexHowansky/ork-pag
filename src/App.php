@@ -13,26 +13,32 @@ namespace Ork\Pag;
 
 use Ork\Pag\Route\Index;
 use Psr\Container\ContainerInterface;
-use Slim\Http\Environment;
-use Slim\Http\Uri;
+use Slim\Factory\AppFactory;
 use Slim\Views\Twig;
-use Slim\Views\TwigExtension;
+use Slim\Views\TwigMiddleware;
 
 /**
  * App class.
  */
-class App extends \Slim\App
+class App
 {
 
     /**
-     * Create new application
+     * The Slim app.
      *
-     * @param ContainerInterface|array $container Either a ContainerInterface or an associative array of app settings.
+     * @var \Slim\App<ContainerInterface|null>
      */
-    public function __construct($container = [])
+    protected \Slim\App $app;
+
+    /**
+     * Create new application.
+     */
+    public function __construct()
     {
-        parent::__construct($container);
+        $this->app = AppFactory::create();
         $this->registerView()->registerRoutes([Index::class]);
+        $this->app->addRoutingMiddleware();
+        $this->app->addErrorMiddleware(false, true, true);
     }
 
     /**
@@ -45,7 +51,7 @@ class App extends \Slim\App
     protected function registerRoutes(array $routes): App
     {
         foreach ($routes as $route) {
-            $this->map($route::METHODS, $route::ROUTE, $route);
+            $this->app->map($route::METHODS, $route::ROUTE, $route);
         }
         return $this;
     }
@@ -57,17 +63,20 @@ class App extends \Slim\App
      */
     protected function registerView(): App
     {
-        $this->getContainer()['view'] = function ($container) {
-            $view = new Twig(
-                (string) realpath(__DIR__ . '/../templates'),
-                ['cache' => false]
-            );
-            $router = $container->get('router');
-            $uri = Uri::createFromEnvironment(new Environment($_SERVER));
-            $view->addExtension(new TwigExtension($router, $uri));
-            return $view;
-        };
+        $twig = Twig::create(
+            (string) realpath(__DIR__ . '/../templates'),
+            ['cache' => false]
+        );
+        $this->app->add(TwigMiddleware::create($this->app, $twig));
         return $this;
+    }
+
+    /**
+     * Run the application.
+     */
+    public function run(): void
+    {
+        $this->app->run();
     }
 
 }
