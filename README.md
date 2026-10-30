@@ -5,6 +5,8 @@
 your board game collection. It pulls data from the [BoardGameGeek](http://boardgamegeek.com)
 API and caches it to a local SQLite database for quick searches.
 
+![example](example.webp "example")
+
 ## Installation
 
 You will need a PHP runtime, and, for a production deployment, a web server.

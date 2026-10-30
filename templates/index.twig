@@ -5,110 +5,154 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="PAG -- the board game organizer.">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css" integrity="sha512-2bBQCjcnw658Lho4nlXJcc6WkV/UxpE/sAokbXPxQNGqmNdQrWqtw26Ns9kFF/yG792pKR1Sx8/Y1Lf1XN4GKA==" crossorigin="anonymous" referrerpolicy="no-referrer">
-        <link rel="stylesheet" href="https://cdn.datatables.net/2.3.7/css/dataTables.bootstrap5.min.css" integrity="sha512-8DvAXGqsIFKNYNBrAHTGRfyVmtBLTj9/q3oC1Yg9nbq37tAEtH/x/blYudf8AwSY0tYqdgHLZ9Zsl9roHDM2/Q==" crossorigin="anonymous" referrerpolicy="no-referrer">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&display=swap">
         <link rel="stylesheet" href="/pag.min.css">
     </head>
     <body>
-        <nav class="navbar fixed-top navbar-expand-md navbar-light bg-light">
-            <div class="container-fluid">
-                <form class="d-flex" method="post" id="form">
-                    <button type="button" class="btn btn-lg btn-primary">Clear</button>
-                    <select name="username" class="form-select form-select-lg ms-2">
-                        <option value="">Any user</option>
-{% for user in users %}
-                        <option value="{{ user }}"{{ post.username == user ? ' selected' }}>{{ user }}</option>
-{% endfor %}
-                    </select>
-                    <select name="numPlayersType" class="form-select form-select-lg ms-2">
-                        <option value="atLeast"{{ post.numPlayersType == 'atLeast' ? ' selected' : '' }}>At least</option>
-                        <option value="suggested"{{ post.numPlayersType == 'suggested' ? ' selected' : '' }}>Suggested</option>
-                    </select>
-                    <select name="numPlayers" class="form-select form-select-lg ms-2">
-                        <option value="">Any players</option>
-{% for players in range(1, 10) %}
-                        <option value="{{ players }}"{{ post.numPlayers == players ? ' selected' }}>
-                            {{ players }} player{{ players > 1 ? 's' }}
-                        </option>
-{% endfor %}
-                    </select>
-                    <select name="maxPlayTime" class="form-select form-select-lg ms-2">
-                        <option value="">Any play time</option>
-{% for playtime, label in {15: '15m', 30: '30m', 45: '45m', 60: '60m', 90: '1h 30m', 120: '2h', 180: '3h'} %}
-                        <option value="{{ playtime }}"{{ post.maxPlayTime == playtime ? ' selected' }}>max {{ label }}</option>
-{% endfor %}
-                    </select>
-                    <select name="maxWeight" class="form-select form-select-lg ms-2">
-                        <option value="">Any weight</option>
-{% for weight in [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5] %}
-                        <option value="{{ weight }}"{{ post.maxWeight == weight ? 'selected' }}>max {{ weight|number_format(1) }}</option>
-{% endfor %}
-                    </select>
-                    <select name="cooperative" class="form-select form-select-lg ms-2">
-                        <option value="">Any type</option>
-                        <option value="0"{{ post.cooperative is defined and post.cooperative == 0 ? ' selected' : '' }}>competitive</option>
-                        <option value="1"{{ post.cooperative is defined and post.cooperative == 1 ? ' selected' : '' }}>cooperative</option>
-                    </select>
-                    <select name="expansions" class="form-select form-select-lg ms-2">
-                        <option value="0"{{ post.expansions ? '' : ' selected' }}>Excluding expansions</option>
-                        <option value="1"{{ post.expansions is not defined or post.expansions ? ' selected' : '' }}>Including expansions</option>
-                    </select>
-                    <input name="search" class="form-control form-control-lg ms-2" type="text" placeholder="Search" autocomplete="off" value="{{ post.search }}">
+{% set playTimes = {15: '15 min', 30: '30 min', 45: '45 min', 60: '1 h', 90: '1 h 30 min', 120: '2 h', 180: '3 h'} %}
+{% set summary = [] %}
+{% if post.numPlayers is not empty %}
+{% set summary = summary|merge([post.numPlayersType == 'suggested' ? 'best with ' ~ post.numPlayers : post.numPlayers ~ ' player' ~ (post.numPlayers > 1 ? 's')]) %}
+{% endif %}
+{% if post.maxPlayTime is not empty %}
+{% set summary = summary|merge([(playTimes[post.maxPlayTime] ?? (post.maxPlayTime ~ ' min')) ~ ' or less']) %}
+{% endif %}
+{% if post.maxWeight is not empty %}
+{% set summary = summary|merge(['weight ' ~ post.maxWeight|number_format(1) ~ ' or less']) %}
+{% endif %}
+{% if post.cooperative is defined and post.cooperative != '' %}
+{% set summary = summary|merge([post.cooperative == 1 ? 'cooperative' : 'competitive']) %}
+{% endif %}
+{% if post.expansions is not empty %}
+{% set summary = summary|merge(['with expansions']) %}
+{% endif %}
+{% if post.search is not empty %}
+{% set summary = summary|merge(['matching “' ~ post.search ~ '”']) %}
+{% endif %}
+        <main class="column">
+            <div class="head">
+                <div class="title-row">
+                    <div>
+                        <h1>
+                            <svg class="mark" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
+                                <rect x="2.75" y="2.75" width="18.5" height="18.5" rx="4" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                                <circle cx="7.5" cy="7.5" r="1.75" fill="currentColor"/>
+                                <circle cx="12" cy="12" r="1.75" fill="#1d5fbf"/>
+                                <circle cx="16.5" cy="16.5" r="1.75" fill="currentColor"/>
+                            </svg>
+                            Pick a Game
+                        </h1>
+                        <p class="sub">
+                            <span class="num">{{ games|length }}</span> game{{ games|length != 1 ? 's' }}
+                            {{- summary is empty ? ' on the shelf' : ' fit: ' ~ summary|join(' · ') }}
+                        </p>
+                    </div>
+                    <label class="scope">
+                        <span>Shelf</span>
+                        <select name="username" form="form" class="control">
+                            <option value="">Everyone’s</option>
+    {% for user in users %}
+                            <option value="{{ user }}"{{ post.username == user ? ' selected' }}>{{ user }}</option>
+    {% endfor %}
+                        </select>
+                    </label>
+                </div>
+                <form class="filters" method="post" id="form" role="search">
+                    <input name="search" class="control search" type="search" placeholder="Search by name" aria-label="Search by name" autocomplete="off" value="{{ post.search }}">
+                    <div class="selects">
+                        <select name="numPlayersType" class="control" aria-label="Player count match">
+                            <option value="atLeast"{{ post.numPlayersType == 'atLeast' ? ' selected' }}>At least</option>
+                            <option value="suggested"{{ post.numPlayersType == 'suggested' ? ' selected' }}>Best with</option>
+                        </select>
+                        <select name="numPlayers" class="control" aria-label="Number of players">
+                            <option value="">Any players</option>
+    {% for players in range(1, 10) %}
+                            <option value="{{ players }}"{{ post.numPlayers == players ? ' selected' }}>{{ players }} player{{ players > 1 ? 's' }}</option>
+    {% endfor %}
+                        </select>
+                        <select name="maxPlayTime" class="control" aria-label="Longest play time">
+                            <option value="">Any length</option>
+    {% for playtime, label in playTimes %}
+                            <option value="{{ playtime }}"{{ post.maxPlayTime == playtime ? ' selected' }}>{{ label }} or less</option>
+    {% endfor %}
+                        </select>
+                        <select name="maxWeight" class="control" aria-label="Heaviest weight">
+                            <option value="">Any weight</option>
+    {% for weight in [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5] %}
+                            <option value="{{ weight }}"{{ post.maxWeight == weight ? ' selected' }}>Weight {{ weight|number_format(1) }} or less</option>
+    {% endfor %}
+                        </select>
+                        <select name="cooperative" class="control" aria-label="Cooperative or competitive">
+                            <option value="">Any type</option>
+                            <option value="0"{{ post.cooperative is defined and post.cooperative == 0 ? ' selected' }}>Competitive</option>
+                            <option value="1"{{ post.cooperative is defined and post.cooperative == 1 ? ' selected' }}>Cooperative</option>
+                        </select>
+                        <select name="expansions" class="control" aria-label="Expansions">
+                            <option value="0"{{ post.expansions is empty ? ' selected' }}>No expansions</option>
+                            <option value="1"{{ post.expansions is not empty ? ' selected' }}>With expansions</option>
+                        </select>
+                        <button type="button" class="btn" id="clear">Clear</button>
+                    </div>
                 </form>
             </div>
-        </nav>
-        <div id="container">
-            <table id="table" class="table table-sm table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Game</th>
-                        <th class="text-center d-none d-md-table-cell">Rank</th>
-                        <th class="text-center">Rating</th>
-                        <th class="text-center">Players</th>
-                        <th class="text-center">Play Time</th>
-                        <th class="text-center">Weight</th>
-                        <th class="text-center d-none d-lg-table-cell">Year</th>
-                    </tr>
-                </thead>
-                <tbody>
+            <div class="panel">
+                <table id="table">
+                    <thead>
+                        <tr>
+                            <th>Game</th>
+                            <th class="num rank">Rank</th>
+                            <th class="num">Rating</th>
+                            <th class="players">Players</th>
+                            <th class="num">Play time</th>
+                            <th class="num">Weight</th>
+                            <th class="num wide">Year</th>
+                        </tr>
+                    </thead>
+                    <tbody>
 {% if games is empty %}
-                    <tr>
-                        <td colspan="7">No matches.</td>
-                    </tr>
+                        <tr class="empty">
+                            <td colspan="7">Nothing on the shelf fits. Loosen a filter or clear them all.</td>
+                        </tr>
 {% else %}
 {% for game in games %}
-                    <tr class="text-center align-middle" data-game-id="{{ game.id }}">
-                        <td class="text-start">
-                            <img class="d-none d-lg-inline" src="{{ game.thumbnail }}" alt="{{ game.name }}">
-                            {{ game.name }}
-                        </td>
-                        <td class="d-none d-md-table-cell">
-                            {{ game.rank ?: 'N/A' }}
-                        </td>
-                        <td>
-                            {{ game.geekRating|number_format(1) }}
-                        </td>
-                        <td>
-                            {{ game.players }}
-                        </td>
-                        <td>
-                            {{ game.playTime }}
-                        </td>
-                        <td>
-                            {{ game.weight|number_format(1) }}
-                        </td>
-                        <td class="d-none d-lg-table-cell">
-                            {{ game.yearPublished }}
-                        </td>
-                    </tr>
+{% set players = game.minPlayers == game.maxPlayers ? game.minPlayers : game.minPlayers ~ '–' ~ game.maxPlayers %}
+{% set best = game.recommendedPlayers and game.minPlayers != game.maxPlayers ? game.recommendedPlayers : null %}
+{% set time = game.minPlayTime == game.maxPlayTime ? game.minPlayTime : game.minPlayTime ~ '–' ~ game.maxPlayTime %}
+                        <tr data-game-id="{{ game.id }}">
+                            <td data-order="{{ game.name }}">
+                                <div class="game">
+                                    <img src="{{ game.thumbnail }}" alt="" loading="lazy" width="96">
+                                    <div>
+                                        <a href="{{ game.url }}" target="_blank" rel="noopener">{{ game.name }}</a>
+                                        <span class="meta">{{ game.cooperative ? 'Cooperative' : 'Competitive' }}</span>
+                                        <span class="meta compact">{{ players }} player{{ game.maxPlayers > 1 ? 's' }}{{ best ? ', best ' ~ best }} · {{ time ?: '—' }}{{ time ? ' min' }} · weight {{ game.weight|number_format(1) }} · rated {{ game.geekRating|number_format(1) }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="num rank" data-order="{{ game.rank ?: 999999 }}"><span class="rank-label">Rank</span>{% if game.rank %}{{ game.rank }}{% else %}<span class="dash" title="Not ranked">—</span>{% endif %}</td>
+                            <td class="num">{{ game.geekRating|number_format(1) }}</td>
+                            <td class="players" data-order="{{ game.minPlayers * 100 + game.maxPlayers }}">
+                                <span class="strip" aria-hidden="true">
+{%- for n in 1..8 -%}
+<i class="{{ n == best ? 'best' : (n >= game.minPlayers and (n <= game.maxPlayers) ? 'on') }}"></i>
+{%- endfor -%}
+                                </span>
+                                <span class="num">{{ players }}</span>{% if best %} <span class="unit">best {{ best }}</span>{% endif %}
+                            </td>
+                            <td class="num" data-order="{{ game.playTime }}">{% if time %}{{ time }}<span class="unit"> min</span>{% else %}<span class="dash">—</span>{% endif %}</td>
+                            <td class="num" data-order="{{ game.weight }}">{% if game.weight %}<span class="weight">{{ game.weight|number_format(1) }}<span class="meter" aria-hidden="true"><i style="width: {{ ((game.weight - 1) / 4 * 100)|round(1) }}%"></i></span></span>{% else %}<span class="dash" title="Not rated">—</span>{% endif %}</td>
+                            <td class="num wide">{{ game.yearPublished ?: '—' }}</td>
+                        </tr>
 {% endfor %}
 {% endif %}
-                </tbody>
-            </table>
-        </div>
+                    </tbody>
+                </table>
+            </div>
+        </main>
         <script src="https://code.jquery.com/jquery-4.0.0.slim.min.js" integrity="sha512-1g+lD9RHY4sYTrehMnFuWSqn3GS1xE2nhSSb5a8JS0WYMnvm1iuxpajRACu0C9tmJSL78O7eQw9TUhGUsRFc0g==" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/js/bootstrap.min.js" integrity="sha512-nKXmKvJyiGQy343jatQlzDprflyB5c+tKCzGP3Uq67v+lmzfnZUi/ZT+fc6ITZfSC5HhaBKUIvr/nTLCV+7F+Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <script src="https://cdn.datatables.net/2.3.7/js/dataTables.min.js" integrity="sha512-S3gF42+P7Zp9CzD/wjMtexyinMHFqX9enJKZ0IOLIVCqRKyhLEpVI6vLyP8kxBdKwP2BxJLkeXIN5YWYhHhm5w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdn.datatables.net/3.1.4/js/dataTables.min.js" integrity="sha512-6kX4REOO8EAxC+ZL7s1qD6ltNliHAYc4zbQXq7aeDQNaPWhcMxHK6jWULhDFf/ryjyZROe+0tQA9aturPI5V/Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="/pag.min.js"></script>
     </body>
 </html>

@@ -1,20 +1,559 @@
-/* Hide the DataTables sorting icons. */
-table.dataTable span.dt-column-order {
-    display: none;
+/*
+ * Achromatic ledger: the chrome is ink on a box-board ground, the covers carry the colour, and the one data hue marks
+ * the best player count. Column: 1152px centred, 24px gutters; the top bar, title, filters and table share its edges.
+ */
+:root {
+    --ground: #f4f3f1;
+    --surface: #ffffff;
+    --raised: #eeeeee;
+    --border: #e6e6e6;
+    --rule: #f0f0f0;
+    --control: #d4d4d4;
+    --text: #0a0a0a;
+    --muted: #6b6b6b;
+    --hue: #1d5fbf;
+    --strip-on: #8a8a8a;
+    --radius-card: 8px;
+    --radius-control: 6px;
+    --panel-inset: 4px;
+    --gap: 12px;
+    --pad: 24px;
+    --control-height: 36px;
+    --row-height: 72px;
+    --head-height: 0px; /* Measured in pag.js: the filters wrap, so the head's height depends on the width. */
+    --fs-title: 24px;
+    --fs-body: 14px;
+    --fs-small: 12px;
+    --font: "Geist", Inter, system-ui, sans-serif;
+    --ease-out: cubic-bezier(0.2, 0, 0, 1);
 }
 
-table tbody tr td {
-    cursor: pointer;
+*, *::before, *::after {
+    box-sizing: border-box;
 }
 
-table tbody tr td img {
-    width: 96px;
-}
-
-#container {
-    margin-top: 64px;
+html {
+    -webkit-text-size-adjust: 100%;
 }
 
 body {
-    font-weight: bold;
+    margin: 0;
+    background: var(--ground);
+    color: var(--text);
+    font: 400 var(--fs-body)/20px var(--font);
+}
+
+h1, p {
+    margin: 0;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button, input, select {
+    font: inherit;
+    color: inherit;
+}
+
+:focus-visible {
+    outline: 2px solid var(--hue);
+    outline-offset: 2px;
+}
+
+.num, table {
+    font-variant-numeric: tabular-nums;
+}
+
+.column {
+    width: 100%;
+    max-width: calc(1152px + 2 * var(--pad));
+    margin: 0 auto;
+    padding: 0 var(--pad);
+}
+
+.scope {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+}
+
+/* Head: the title row and the filters stay at the top while the list scrolls, and the column labels stay just below
+ * them, with a rule only once content scrolls under the labels. */
+.head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding-bottom: var(--gap);
+    background: var(--ground);
+    transition: box-shadow 160ms ease;
+}
+
+.head.stuck + .panel th {
+    box-shadow: 0 1px 0 var(--border); /* taste-skill-ignore: a 1px rule, only once content scrolls under the sticky bar */
+}
+
+.title-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    padding: var(--gap) 0 var(--gap);
+}
+
+.title-row h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: var(--fs-title);
+    line-height: 30px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+}
+
+.title-row .sub {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 15px;
+}
+
+/* Controls */
+.control {
+    height: var(--control-height);
+    padding: 0 12px;
+    border: 1px solid var(--control);
+    border-radius: var(--radius-control);
+    background: var(--surface);
+    transition: border-color 120ms ease;
+}
+
+.control:hover {
+    border-color: #a8a8a8;
+}
+
+select.control {
+    appearance: none;
+    padding-right: 30px;
+    background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5 6 7.5 9 4.5' fill='none' stroke='%236b6b6b' stroke-width='1.5'/%3E%3C/svg%3E") right 10px center no-repeat;
+    cursor: pointer;
+}
+
+.search::placeholder {
+    color: var(--muted);
+}
+
+.btn {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    height: var(--control-height);
+    padding: 0 14px;
+    border: 0;
+    border-radius: var(--radius-control);
+    background: #e5e5e5;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 120ms ease, transform 120ms var(--ease-out);
+}
+
+.btn:hover {
+    background: #dadada;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+/* Filters: the search, then one row of selects. */
+.filters {
+    display: flex;
+    gap: 8px;
+}
+
+/* On a wide screen the selects, the search and Clear share one row, the search last before Clear. Narrower, the search
+ * takes its own line above the selects. */
+.filters .search {
+    order: 1;
+    flex: 1 1 220px;
+    min-width: 0;
+}
+
+.selects {
+    display: contents;
+}
+
+#clear {
+    order: 2;
+}
+
+/* The table panel */
+.panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--panel-inset) 10px;
+}
+
+/* The panel's top edge scrolls away under the head, so a copy of it stays pinned there to keep the rounded corners. It
+ * sits behind the column labels, and fills the panel's square corners behind it with the ground. */
+.panel::before {
+    content: "";
+    display: block;
+    position: sticky;
+    top: var(--head-height);
+    z-index: 1;
+    height: var(--radius-card);
+    margin: calc(-1 * var(--panel-inset) - 1px) -11px calc(var(--panel-inset) + 1px - var(--radius-card));
+    border: 1px solid var(--border);
+    border-bottom: 0;
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+    background: var(--surface);
+    box-shadow: 0 0 0 var(--radius-card) var(--ground); /* taste-skill-ignore: a flat fill, clipped to the corners */
+    clip-path: inset(0 calc(-1 * var(--radius-card)));
+}
+
+table {
+    width: 100%;
+    border-collapse: separate; /* Collapsed, the sticky labels don't paint their rule. */
+    border-spacing: 0;
+}
+
+th {
+    position: sticky;
+    top: calc(var(--head-height) + var(--panel-inset) + 1px);
+    z-index: 1;
+    height: 40px;
+    padding: 0 12px;
+    background: var(--surface);
+    font-size: var(--fs-small);
+    font-weight: 400;
+    color: var(--muted);
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition: box-shadow 160ms ease;
+}
+
+th:first-child, td:first-child {
+    padding-left: 0;
+}
+
+th:last-child, td:last-child {
+    padding-right: 0;
+}
+
+th:hover {
+    color: var(--text);
+}
+
+th[aria-sort] {
+    color: var(--text);
+}
+
+th[aria-sort] .dt-column-title::after {
+    content: "";
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-left: 6px;
+    vertical-align: 2px;
+    border: 4px solid transparent;
+}
+
+th[aria-sort="descending"] .dt-column-title::after {
+    border-top: 5px solid currentColor;
+    border-bottom: 0;
+}
+
+th[aria-sort="ascending"] .dt-column-title::after {
+    border-bottom: 5px solid currentColor;
+    border-top: 0;
+}
+
+/* On a right-aligned figure column the glyph leads, so the label stays flush with its figures. */
+th.num[aria-sort] .dt-column-title::after {
+    display: none;
+}
+
+th.num[aria-sort] .dt-column-title::before {
+    content: "";
+    display: inline-block;
+    margin-right: 6px;
+    vertical-align: 2px;
+    border: 4px solid transparent;
+}
+
+th.num[aria-sort="descending"] .dt-column-title::before {
+    border-top: 5px solid currentColor;
+    border-bottom: 0;
+}
+
+th.num[aria-sort="ascending"] .dt-column-title::before {
+    border-bottom: 5px solid currentColor;
+    border-top: 0;
+}
+
+th.num, td.num {
+    text-align: right;
+}
+
+td {
+    height: var(--row-height);
+    padding: 6px 12px;
+    border-top: 1px solid var(--rule);
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+tbody tr {
+    cursor: pointer;
+}
+
+tbody tr:hover td {
+    background: #fafaf9;
+}
+
+tr.empty td {
+    height: 96px;
+    color: var(--muted);
+    white-space: normal;
+    cursor: default;
+}
+
+/* DataTables wraps the header text; keep it inline and drop its own (unstyled) order glyph. */
+.dt-column-header {
+    display: inline;
+}
+
+span.dt-column-order {
+    display: none;
+}
+
+th.dt-orderable-none {
+    cursor: default;
+}
+
+.game {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    white-space: normal;
+}
+
+.game img {
+    flex: none;
+    width: 96px;
+    height: auto;
+    border-radius: 3px;
+    background: var(--raised);
+}
+
+.game a {
+    display: block;
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.game a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.meta {
+    display: block;
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: var(--fs-small);
+    line-height: 16px;
+}
+
+.meta.compact {
+    display: none;
+}
+
+.unit, .dash {
+    color: var(--muted);
+}
+
+.unit {
+    font-size: var(--fs-small);
+}
+
+/* Player strip: one cell per count from 1 to 8, the playable range in grey, the best count in the data hue. */
+.strip {
+    display: inline-flex;
+    gap: 2px;
+    margin-right: 10px;
+    vertical-align: -1px;
+}
+
+.strip i {
+    width: 8px;
+    height: 12px;
+    border-radius: 2px;
+    background: var(--raised);
+}
+
+.strip i.on {
+    background: var(--strip-on);
+}
+
+.strip i.best {
+    background: var(--hue);
+}
+
+/* Weight meter: a thin bar under the figure on BGG's fixed 1-5 scale, out of the flow so the figure keeps its line. */
+.weight {
+    position: relative;
+    display: inline-block;
+}
+
+.meter {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 40px;
+    height: 3px;
+    margin-top: 3px;
+    border-radius: 2px;
+    background: var(--raised);
+    overflow: hidden;
+}
+
+.meter i {
+    display: block;
+    height: 100%;
+    background: var(--strip-on);
+}
+
+/* The rank keeps its place at every width; on a phone, where the header row folds away, it carries its own label. */
+.rank-label {
+    display: none;
+}
+
+/* Tablet: rank and year give their width to the game. */
+@media (max-width: 1100px) {
+    .filters {
+        flex-wrap: wrap;
+    }
+
+    .filters .search {
+        order: 0;
+        flex-basis: 100%;
+    }
+
+    .selects {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    #clear {
+        order: 0;
+    }
+
+    .wide {
+        display: none;
+    }
+}
+
+/* Phone: one row of selects that scrolls sideways, and two-line rows with every field on line 2. */
+@media (max-width: 640px) {
+    :root {
+        --pad: 16px;
+        --control-height: 44px;
+    }
+
+    /* The header row folds away here, so the rule belongs to the head. */
+    .head.stuck {
+        box-shadow: 0 1px 0 var(--border); /* taste-skill-ignore: a 1px rule, only once content scrolls under the sticky bar */
+    }
+
+    .title-row {
+        padding: 4px 0 12px;
+        flex-wrap: wrap;
+    }
+
+    .title-row h1 {
+        font-size: 22px;
+    }
+
+    .title-row .mark {
+        width: 24px;
+        height: 24px;
+    }
+
+    .selects {
+        flex-wrap: nowrap;
+        margin: 0 calc(-1 * var(--pad));
+        padding: 0 var(--pad) 2px;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .selects > * {
+        flex: none;
+    }
+
+    .panel {
+        padding: 0 8px;
+    }
+
+    .panel::before {
+        display: none;
+    }
+
+    thead, td:not(:first-child, .rank) {
+        display: none;
+    }
+
+    tbody tr:first-child td {
+        border-top: 0;
+    }
+
+    td {
+        height: auto;
+        padding: 6px 0;
+    }
+
+    .meta:not(.compact) {
+        display: none;
+    }
+
+    .meta.compact {
+        display: block;
+        font-size: 13px;
+        line-height: 18px;
+    }
+
+    td.rank {
+        padding-left: 12px;
+        font-size: 15px;
+        font-weight: 500;
+    }
+
+    .rank-label {
+        display: block;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 18px;
+    }
+
+    .game img {
+        width: 44px;
+        height: 44px;
+        object-fit: cover;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+    }
 }
